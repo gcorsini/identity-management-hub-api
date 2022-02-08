@@ -1,0 +1,37 @@
+{
+  "name": "identity-management-hub-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API of thesis Scalable, privacy-protecting device identity management on blockchain using zero-knowledge proofs",
+  "main": "api.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gcorsini/identity-management-hub-api"
+  },
+  "scripts": {
+    "start": "node ./bin/startup.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Guillaume Corsini <guillaume.corsini@students.unibe.ch>",
+  "license": "MIT",
+  "dependencies": {
+    "@truffle/contract": "^4.4.7",
+    "@truffle/hdwallet-provider": "^2.0.3",
+    "axios": "^0.21.4",
+    "circom_tester": "0.0.9",
+    "circomlibjs": "^0.1.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-validator": "^6.14.0",
+    "json-diff": "^0.7.1",
+    "pug": "^3.0.2",
+    "qrcode": "^1.5.0",
+    "snarkjs": "^0.4.13",
+    "uuid": "^8.3.2",
+    "web3": "^1.7.0"
+  },
+  "devDependencies": {
+    "ngrok": "^4.2.2",
+    "nodemon": "^2.0.15"
+  }
+}
