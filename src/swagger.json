@@ -1,0 +1,601 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is the API that enables identity management using zk-SNARKS or Verifiable Credentials.",
+    "version": "1.0.0",
+    "title": "Identity Management Hub API",
+    "contact": {
+      "email": "guillaume.corsini@students.unibe.ch"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/gcorsini/identity-management-hub-api/blob/0f373441febfa73b23166848ac214db6f3378565/LICENSE"
+    }
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Issuers",
+      "description": "Uses the MATTR VII API to handle everything around issuers."
+    },
+    {
+      "name": "Verifiable Credentials",
+      "description": "Uses the MATTR VII API to handle everything around verifiable credentials."
+    },
+    {
+      "name": "Whitelist",
+      "description": "A sparse Merkle tree containing the hashed DIDs of the allowed issuers."
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/issuers": {
+      "get": {
+        "tags": [
+          "Issuers"
+        ],
+        "summary": "get list of all issuers",
+        "description": "It returns a list of all issuers available.\n",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "list of all issuers",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DID"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Issuers"
+        ],
+        "summary": "Create a new issuer",
+        "description": "Creates a new issuer and saves the new DID document of the new issuer to a file",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "new DID document",
+            "schema": {
+              "$ref": "#/definitions/DIDDocument"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/issuers/verify": {
+      "post": {
+        "tags": [
+          "Issuers"
+        ],
+        "summary": "Verify the DID document of an issuer.",
+        "description": "Verifies that the DID document of an issuer is valid.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "JSON with verified true / false and optionally a reason.",
+            "schema": {
+              "$ref": "#/definitions/VerifiedObject"
+            }
+          }
+        }
+      }
+    },
+    "/issuers/vcs": {
+      "get": {
+        "tags": [
+          "Issuers"
+        ],
+        "summary": "Get a list of all verifiable credentials.",
+        "description": "Gets a list of all verifiable credentials containing the tag covidCert.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of all verifiable credentials with the tag covidCert.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/VerifiableCredential"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vcs": {
+      "get": {
+        "tags": [
+          "Verifiable Credentials"
+        ],
+        "summary": "Get a list of all verifiable credentials.",
+        "description": "Gets a list of all verifiable credentials containing the tag covidCert.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of all verifiable credentials with the tag covidCert.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/VerifiableCredential"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Verifiable Credentials"
+        ],
+        "summary": "Creates a new verifiable credential.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns the generated verifiable credential."
+          }
+        }
+      }
+    },
+    "/vcs/{id}": {
+      "delete": {
+        "tags": [
+          "Verifiable Credentials"
+        ],
+        "summary": "Delete a specific verifiable credential.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The id of a verifiable credential",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Json containing the information if it was deleted or not.",
+            "schema": {
+              "$ref": "#/definitions/inline_response_200"
+            }
+          }
+        }
+      }
+    },
+    "/vcs/verifyFullCert": {
+      "post": {
+        "tags": [
+          "Verifiable Credentials"
+        ],
+        "summary": "Verifies a verifiable credential.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "JSON with verified true / false and optionally a reason.",
+            "schema": {
+              "$ref": "#/definitions/VerifiedObject"
+            }
+          }
+        }
+      }
+    },
+    "/vcs/share/{targetId}": {
+      "post": {
+        "tags": [
+          "Verifiable Credentials"
+        ],
+        "summary": "Shares sends a verifiable credential to the MATTR wallet of targetId.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "targetId",
+            "in": "path",
+            "description": "The public did of the MATTR wallet.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "credentials",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/VerifiableCredential"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Json containing the information if it was sent or not.",
+            "schema": {
+              "$ref": "#/definitions/inline_response_200_1"
+            }
+          }
+        }
+      }
+    },
+    "/vcs/verify": {
+      "post": {
+        "tags": [
+          "Verifiable Credentials"
+        ],
+        "summary": "EXPERIMENTAL - Verifies a verifiable credential using a QR code (currently displayed in the console).",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Process was sucessful. Nothing is returned"
+          }
+        }
+      }
+    },
+    "/vcs/qr": {
+      "get": {
+        "tags": [
+          "Verifiable Credentials"
+        ],
+        "summary": "EXPERIMENTAL - Gets the result from the a successfully scanned QR code. Redirects to the jwsURL.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "No return as its being forwarded."
+          }
+        }
+      }
+    },
+    "/vcs/callback": {
+      "post": {
+        "tags": [
+          "Verifiable Credentials"
+        ],
+        "summary": "EXPERIMENTAL - Receives the result from a successfully scanned QR code. Logs its body to the console.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Process was sucessful. Nothing is returned"
+          }
+        }
+      }
+    },
+    "/tree": {
+      "get": {
+        "tags": [
+          "Whitelist"
+        ],
+        "summary": "Generates a list of all the members in the tree.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of all the whitelisted issuers.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DID"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Whitelist"
+        ],
+        "summary": "Creates a new issuer and adds its DID to the whitelist (tree).",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sucessfully added a newly created issuer.",
+            "schema": {
+              "$ref": "#/definitions/inline_response_200_2"
+            }
+          }
+        }
+      }
+    },
+    "/tree/{issuerDID}": {
+      "get": {
+        "tags": [
+          "Whitelist"
+        ],
+        "summary": "Find the issuerDID and create a zk-SNARK proof which gets verified.",
+        "parameters": [
+          {
+            "name": "issuerDID",
+            "in": "path",
+            "description": "The DID of an issuer.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JSON with verified true / false and optionally a reason.",
+            "schema": {
+              "$ref": "#/definitions/VerifiedObject"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Whitelist"
+        ],
+        "summary": "Adds the DID of an issuer to the whitelist (tree).",
+        "parameters": [
+          {
+            "name": "issuerDID",
+            "in": "path",
+            "description": "The DID of an issuer.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucessfully added the issuer."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Whitelist"
+        ],
+        "summary": "Remove the issuerDID from the tree.",
+        "parameters": [
+          {
+            "name": "issuerDID",
+            "in": "path",
+            "description": "The DID of an issuer.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "all good"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DID": {
+      "type": "string",
+      "example": "did:key:zUC78UjuWrAqbZxScVDkcQe1tRPJSe6Nr46AhxKEdus599VzbVAgmQPbTVNZjvuWor3LQ6Sz4PSzn4tf5UXUsH9qqksu75g2pfB4zFurAfBfZKvoFNJkrcEwazrS66bAqgubwyM"
+    },
+    "DIDDocument": {
+      "type": "object",
+      "properties": {
+        "did": {
+          "$ref": "#/definitions/DID"
+        },
+        "registrationStatus": {
+          "type": "string",
+          "example": "COMPLETED"
+        },
+        "localMetadata": {
+          "$ref": "#/definitions/DIDDocument_localMetadata"
+        }
+      }
+    },
+    "VerifiedObject": {
+      "type": "object",
+      "required": [
+        "verified"
+      ],
+      "properties": {
+        "verified": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string",
+          "example": "DID is invalid"
+        }
+      }
+    },
+    "VerifiableCredential": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "d243b2ec-bba5-4781-a171-62cb4bfe62e6"
+        },
+        "tag": {
+          "type": "string",
+          "example": "covidCert"
+        },
+        "credentialStatus": {
+          "$ref": "#/definitions/VerifiableCredential_credentialStatus"
+        },
+        "issuanceDate": {
+          "type": "string",
+          "example": "2022-02-08T14:42:11.653+0000"
+        }
+      }
+    },
+    "inline_response_200": {
+      "type": "object",
+      "properties": {
+        "deleted": {
+          "type": "boolean"
+        }
+      }
+    },
+    "inline_response_200_1": {
+      "type": "object",
+      "properties": {
+        "sent": {
+          "type": "boolean"
+        }
+      }
+    },
+    "inline_response_200_2": {
+      "type": "object",
+      "properties": {
+        "did": {
+          "type": "string",
+          "description": "The DID of the created issuer."
+        }
+      }
+    },
+    "DIDDocument_localMetadata_keys": {
+      "type": "object",
+      "properties": {
+        "didDocumentKeyId": {
+          "type": "string",
+          "example": "did:key:zUC7CErsyB2uuD4kYoQuiPQ7hs6eUd6rwvmSn4RgTGBc1LbdqHCaMijrfhH2hCdHMGgCWY6uDgReCYRLS3q8ydBtwLxB5AWame4jb5Ahy3LceymVUSrXopxWFjy3miTRW49SiiK#zUC7CErsyB2uuD4kYoQuiPQ7hs6eUd6rwvmSn4RgTGBc1LbdqHCaMijrfhH2hCdHMGgCWY6uDgReCYRLS3q8ydBtwLxB5AWame4jb5Ahy3LceymVUSrXopxWFjy3miTRW49SiiK"
+        },
+        "kmsKeyId": {
+          "type": "string",
+          "example": "426da71d-4465-49cc-9bbc-96de5996af9d"
+        }
+      }
+    },
+    "DIDDocument_localMetadata_initialDidDocument_publicKey": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "did:key:zUC7CErsyB2uuD4kYoQuiPQ7hs6eUd6rwvmSn4RgTGBc1LbdqHCaMijrfhH2hCdHMGgCWY6uDgReCYRLS3q8ydBtwLxB5AWame4jb5Ahy3LceymVUSrXopxWFjy3miTRW49SiiK#zUC7CErsyB2uuD4kYoQuiPQ7hs6eUd6rwvmSn4RgTGBc1LbdqHCaMijrfhH2hCdHMGgCWY6uDgReCYRLS3q8ydBtwLxB5AWame4jb5Ahy3LceymVUSrXopxWFjy3miTRW49SiiK"
+        },
+        "type": {
+          "type": "string",
+          "example": "Bls12381G2Key2020"
+        },
+        "controller": {
+          "type": "string",
+          "example": "did:key:zUC7CErsyB2uuD4kYoQuiPQ7hs6eUd6rwvmSn4RgTGBc1LbdqHCaMijrfhH2hCdHMGgCWY6uDgReCYRLS3q8ydBtwLxB5AWame4jb5Ahy3LceymVUSrXopxWFjy3miTRW49SiiK"
+        },
+        "publicKeyBase58": {
+          "type": "string",
+          "example": "xQJzuVNgYbCY8rk4YShuQZjjELneuxDWufqryQioGTEqRgEwf4LhsFKMYDH2py8ZNKh2BGZppesNVB71pMrB7PRTGpcUozwFKRUK4phkB2dd7YWvitnQ5wZ5JXiXvVzaE71"
+        }
+      }
+    },
+    "DIDDocument_localMetadata_initialDidDocument": {
+      "type": "object",
+      "properties": {
+        "@context": {
+          "type": "string",
+          "example": "https://w3.org/ns/did/v1"
+        },
+        "id": {
+          "type": "string",
+          "example": "did:key:zUC7CErsyB2uuD4kYoQuiPQ7hs6eUd6rwvmSn4RgTGBc1LbdqHCaMijrfhH2hCdHMGgCWY6uDgReCYRLS3q8ydBtwLxB5AWame4jb5Ahy3LceymVUSrXopxWFjy3miTRW49SiiK"
+        },
+        "publicKey": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DIDDocument_localMetadata_initialDidDocument_publicKey"
+          }
+        },
+        "authentication": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "example": "did:key:zUC7CErsyB2uuD4kYoQuiPQ7hs6eUd6rwvmSn4RgTGBc1LbdqHCaMijrfhH2hCdHMGgCWY6uDgReCYRLS3q8ydBtwLxB5AWame4jb5Ahy3LceymVUSrXopxWFjy3miTRW49SiiK#zUC7CErsyB2uuD4kYoQuiPQ7hs6eUd6rwvmSn4RgTGBc1LbdqHCaMijrfhH2hCdHMGgCWY6uDgReCYRLS3q8ydBtwLxB5AWame4jb5Ahy3LceymVUSrXopxWFjy3miTRW49SiiK"
+          }
+        },
+        "assertionMethod": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "example": "did:key:zUC7CErsyB2uuD4kYoQuiPQ7hs6eUd6rwvmSn4RgTGBc1LbdqHCaMijrfhH2hCdHMGgCWY6uDgReCYRLS3q8ydBtwLxB5AWame4jb5Ahy3LceymVUSrXopxWFjy3miTRW49SiiK#zUC7CErsyB2uuD4kYoQuiPQ7hs6eUd6rwvmSn4RgTGBc1LbdqHCaMijrfhH2hCdHMGgCWY6uDgReCYRLS3q8ydBtwLxB5AWame4jb5Ahy3LceymVUSrXopxWFjy3miTRW49SiiK"
+          }
+        },
+        "capabilityDelegation": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "example": "did:key:zUC7CErsyB2uuD4kYoQuiPQ7hs6eUd6rwvmSn4RgTGBc1LbdqHCaMijrfhH2hCdHMGgCWY6uDgReCYRLS3q8ydBtwLxB5AWame4jb5Ahy3LceymVUSrXopxWFjy3miTRW49SiiK#zUC7CErsyB2uuD4kYoQuiPQ7hs6eUd6rwvmSn4RgTGBc1LbdqHCaMijrfhH2hCdHMGgCWY6uDgReCYRLS3q8ydBtwLxB5AWame4jb5Ahy3LceymVUSrXopxWFjy3miTRW49SiiK"
+          }
+        },
+        "capabilityInvocation": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "example": "did:key:zUC7CErsyB2uuD4kYoQuiPQ7hs6eUd6rwvmSn4RgTGBc1LbdqHCaMijrfhH2hCdHMGgCWY6uDgReCYRLS3q8ydBtwLxB5AWame4jb5Ahy3LceymVUSrXopxWFjy3miTRW49SiiK#zUC7CErsyB2uuD4kYoQuiPQ7hs6eUd6rwvmSn4RgTGBc1LbdqHCaMijrfhH2hCdHMGgCWY6uDgReCYRLS3q8ydBtwLxB5AWame4jb5Ahy3LceymVUSrXopxWFjy3miTRW49SiiK"
+          }
+        }
+      }
+    },
+    "DIDDocument_localMetadata": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DIDDocument_localMetadata_keys"
+          }
+        },
+        "registered": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1644356174538
+        },
+        "initialDidDocument": {
+          "$ref": "#/definitions/DIDDocument_localMetadata_initialDidDocument"
+        }
+      }
+    },
+    "VerifiableCredential_credentialStatus": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "https://guillaume-corsini-xxdjlg.vii.mattr.global/core/v1/revocation-lists/5695ebe8-f6e4-45d8-a631-458dd10642b8#1"
+        },
+        "type": {
+          "type": "string",
+          "example": "RevocationList2020Status"
+        },
+        "revocationListIndex": {
+          "type": "string",
+          "example": "1"
+        },
+        "revocationListCredential": {
+          "type": "string",
+          "example": "https://guillaume-corsini-xxdjlg.vii.mattr.global/core/v1/revocation-lists/5695ebe8-f6e4-45d8-a631-458dd10642b8"
+        }
+      }
+    }
+  }
+}

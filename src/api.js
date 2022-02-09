@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocu = require('./swagger.json');
 
 MATTR_TOKEN_PROMISE = getMattrToken();
 
@@ -17,6 +19,7 @@ app.use(express.urlencoded());
 app.use('/issuers', issuersRouter);
 app.use('/vcs', verifiableCredentialsRouter);
 app.use('/tree', treeRouter);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocu));
 
 // If the MATTR_TOKEN is required, e.g. to use in Postman
 app.get('/', function (req, res) {
